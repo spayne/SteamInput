@@ -1,0 +1,17 @@
+{
+  "name": "ovrinput",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "windows-registry": "^0.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.12"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
