@@ -68,7 +68,7 @@ function look_for_action_files(json_file_names)
   return action_files;
 }
 
-export function findActionFiles() : string[]
+export function findActionManifestFiles() : string[]
 {
     var steam_apps_path = lookup_steam_apps_path();
     var json_files = findJSONFiles(steam_apps_path, null);
@@ -139,21 +139,17 @@ function validate_action_manifest_file(action_file_name)
   }
 }
 
-// walk through each file and print out
-// any files that don't appear to be valid
-export function validateActionManifestFiles(action_file_names : Array<string>)
+export function validateActionManifestFile(action_file_name : string) : boolean
 {
-  for (const fn of action_file_names)
+  let rc : boolean = true;
+  try {
+    validate_action_manifest_file(action_file_name);
+  } catch (e)
   {
-    try {
-      validate_action_manifest_file(fn);
-    }
-    catch(e)
-    {
-      console.log(fn);
-      console.log(e);
-    }
-  } 
+    rc = false;
+  }
+  return rc;
 }
+
   
   
