@@ -1,6 +1,78 @@
 import * as fs from "fs";
 import * as path from "path";
 import { windef, Key } from "windows-registry";
+
+export class ActionManifest {
+
+  actions : {name : string, requirement : string , type: string} [] = [];
+  default_bindings : { controller_type: string, binding_url : string }[] = [];
+  action_sets : {name : string, usage: string}[] = [];
+  // an array of objects/
+  localization : any[] = [];
+
+  constructor() {    
+  }
+  
+  addAction(name : string, requirement : string, type : string) {
+   this.actions.push({name,requirement,type}); 
+  }
+  addDefaultBinding(controller_type : string, binding_url : string)
+  {
+    this.default_bindings.push({controller_type, binding_url});
+  }
+  addActionSet(name : string, usage: string)
+  {
+    this.action_sets.push({name, usage});
+  }
+
+  // search through the localization array and return the index
+  // of the entry corresponding to the tag.  return -1 if not found
+  findIndexForLocalizationTag(language_tag : string) : number
+  {
+    let index : number = -1;
+    for(let i=0; i<this.localization.length; i++)
+    { 
+      if (this.localization[i].language_tag == language_tag)
+      {
+        return i;
+      }
+    }
+    return index;
+  }
+
+  addLocalizationEntry(language_tag: string, key: string, value: string)
+  {
+    // find the bucket for this language_tag
+    let index : number = this.findIndexForLocalizationTag(language_tag);
+    if (index == -1)
+    {
+      var dict = {};
+      dict['language_tag'] = language_tag;
+      this.localization.push(dict);
+      index = this.localization.length-1;
+    } 
+    // push the key and value
+    this.localization[index][key] = value;
+  }
+
+  writeJSONfile(filename : string)
+  {
+    fs.writeFileSync(filename, JSON.stringify(this,null, 4));
+  }
+
+  validate()
+  {
+    var action_sets = this.action_sets;
+    var action_set_names = action_sets.map(action_set => action_set.name.match('\/actions\/(.*)')[1]);
+    for (const action of this.actions)
+    {
+      validate_action(action, action_set_names);
+    }
+  }
+
+  
+}
+
 function lookup_registry_string(keyname : string) : string
 {
     var f = 'SOFTWARE\\Wow6432Node\\Valve\\Steam';
@@ -73,10 +145,8 @@ export function findActionManifestFiles() : string[]
     var steam_apps_path = lookup_steam_apps_path();
     var json_files = findJSONFiles(steam_apps_path, null);
     var action_files = look_for_action_files(json_files);
-    return action_files;
-    
+    return action_files;    
 }  
-
 
 function verify_action_path(path, action_set_names)
 {
@@ -84,19 +154,19 @@ function verify_action_path(path, action_set_names)
   // should start with //actions
   
   if (action_string != "actions") {
-    throw("unexpected: " + action_string + " expected: actions");
+    throw("ERROR unexpected: " + action_string + " expected: actions");
   }
   if (!action_set_names.includes(action_set))
   {
-    throw("invalid action set " + action_set);
+    throw("ERROR unknown action set '" + action_set + "' in action path: " + path);
   }
   if (!["in","out"].includes(io))
   {
-    throw("unexpected io direction"+ io);
+    throw("ERROR unexpected io direction: " + io + "' in action path: " + path);
   }
   if (name.length == 0)
   {
-    throw("name is too short");
+    throw("ERROR action name is too short in action path: " + path);
   }
 }
 
@@ -104,7 +174,7 @@ function verify_action_path(path, action_set_names)
 function verify_action_set_usage(u)
 {
   if (!["single", "leftright", "hidden"].includes(u)) {
-    throw("unexpected usage: " + u);  
+    throw("ERROR unexpected usage: " + u);  
   }
 }
 
