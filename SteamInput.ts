@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { windef, Key } from "windows-registry";
 
-
 class Action {
   public name : string;
   public requirement : string;
@@ -20,7 +19,6 @@ class ActionSet {
 }
 
 export class ActionManifest {
-
   actions : Action[] = [];
   default_bindings : DefaultBinding[] = [];
   action_sets : ActionSet[] = [];
@@ -92,8 +90,6 @@ export class ActionManifest {
     manifest.actions = jsonobj.actions;
     manifest.default_bindings = jsonobj.default_bindings;
     manifest.localization = jsonobj.localization;
-    
-   
     return manifest;
   }
 
@@ -106,11 +102,10 @@ export class ActionManifest {
       validate_action(action, action_set_names);
     }
   }
-
-  
 }
 
-function lookup_registry_string(keyname : string) : string
+
+function lookup_steam_registry_string(keyname : string) : string
 {
     var f = 'SOFTWARE\\Wow6432Node\\Valve\\Steam';
     const key1 = new Key(windef.HKEY.HKEY_LOCAL_MACHINE, '', windef.KEY_ACCESS.KEY_READ);
@@ -123,16 +118,14 @@ function lookup_registry_string(keyname : string) : string
 
 function lookup_steam_apps_path() : string
 {
-    var steam_install_path = lookup_registry_string("InstallPath");
+    let steam_install_path : string = lookup_steam_registry_string("InstallPath");
     return path.join(steam_install_path, "steamapps", "common");
 }
 
 // find all action files by searching down the install path for all
 // json files.
 function findJSONFiles(dir, filelist) {
-    var path = path || require('path');
-    var fs = fs || require('fs'),
-        files = fs.readdirSync(dir);
+    var files = fs.readdirSync(dir);
     filelist = filelist || [];
     files.forEach(function(file) {
       if (fs.statSync(path.join(dir, file)).isDirectory()) {
@@ -185,7 +178,7 @@ export function findActionManifestFiles() : string[]
     return action_files;    
 }  
 
-function verify_action_path(path, action_set_names)
+function verify_action_path(path : string, action_set_names : string[])
 {
   var [prefix, action_string, action_set, io, name] = path.split('/');
   // should start with //actions
@@ -208,14 +201,14 @@ function verify_action_path(path, action_set_names)
 }
 
 // actions have a usage parameter
-function verify_action_set_usage(u)
+function verify_action_set_usage(u : string)
 {
   if (!["single", "leftright", "hidden"].includes(u)) {
     throw("ERROR unexpected usage: " + u);  
   }
 }
 
-function verify_action_type(t)
+function verify_action_type(t : string)
 {
   if (!["boolean", "vector1", "vector2", "vector3", "vibration", "pose", "skeleton"].includes(t))
   {
@@ -224,39 +217,20 @@ function verify_action_type(t)
 }
 function validate_action(action_obj, action_set_names)
 {
-
   verify_action_path(action_obj.name, action_set_names);
   verify_action_type(action_obj.type);
-}
-
-function validate_action_manifest_file(action_file_name)
-{
-  var manifest = load_file_as_json(action_file_name);
-  // make sure it has at least one action
-  if (manifest.actions.length < 1)
-  { 
-    throw("empty actions");
-  }
-  
-  var action_sets = manifest.action_sets;
-  var action_set_names = action_sets.map(action_set => action_set.name.match('\/actions\/(.*)')[1]);
-  for (const action of manifest.actions)
-  {
-    validate_action(action, action_set_names);
-  }
 }
 
 export function validateActionManifestFile(action_file_name : string) : boolean
 {
   let rc : boolean = true;
   try {
-    validate_action_manifest_file(action_file_name);
+    let manifest : ActionManifest;
+    manifest = ActionManifest.loadJSONfile(action_file_name);
+    manifest.validate();
   } catch (e)
   {
     rc = false;
   }
   return rc;
 }
-
-  
-  

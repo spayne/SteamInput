@@ -31,7 +31,6 @@ function test_creating_valid_action_file()
 
     let a2 = SI.ActionManifest.loadJSONfile(filename);
     console.log(_.isEqual(a1,a2));
-
 }
 
 function test_creating_invalid_action_file()
