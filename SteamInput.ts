@@ -1,30 +1,24 @@
 import * as fs from "fs";
 import * as path from "path";
 import { windef, Key } from "windows-registry";
-import 'reflect-metadata';
-import { jsonObject, jsonMember, jsonArrayMember, TypedJSON } from 'typedjson';
 
-@jsonObject
+
 class Action {
   public name : string;
   public requirement : string;
   public type: string;
 }
 
-@jsonObject
 class DefaultBinding {
   public controller_type: string;
   public binding_url : string
 }
 
-@jsonObject
 class ActionSet {
   public name : string;
   public usage : string;
 }
 
-
-@jsonObject
 export class ActionManifest {
 
   actions : Action[] = [];
