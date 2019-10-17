@@ -85,11 +85,22 @@ export class ActionManifest {
     fs.writeFileSync(filename, JSON.stringify(this,null, 4));
   }
 
-  loadJSONfile(fn)
+  // todo: see if there is a way to load a json file into
+  // an existing instance.
+  static loadJSONfile(filename : string) : ActionManifest
   {
-    let contents : Buffer = fs.readFileSync(fn);
-    //var jsonobj = JSON.parse(contents.toString(), this);
-    //this = jsonobj;
+    let contents : Buffer = fs.readFileSync(filename);
+    let manifest : ActionManifest;
+
+    var jsonobj = JSON.parse(contents.toString());
+    manifest = new ActionManifest;
+    manifest.action_sets = jsonobj.action_sets;
+    manifest.actions = jsonobj.actions;
+    manifest.default_bindings = jsonobj.default_bindings;
+    manifest.localization = jsonobj.localization;
+    
+   
+    return manifest;
   }
 
   validate()

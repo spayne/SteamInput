@@ -1,4 +1,5 @@
 import * as SI from "./SteamInput";
+import * as _ from "lodash";
 
 function test_action_file_validation()
 {
@@ -24,8 +25,13 @@ function test_creating_valid_action_file()
     a1.addActionSet("/actions/main", "leftright");
     a1.addLocalizationEntry("en_us", "foo", "bar");
     a1.addLocalizationEntry("en_us", "foo1", "bar1");
-    a1.writeJSONfile("./a1-actions.json");
+    var filename = "./a1-actions.json";
+    a1.writeJSONfile(filename);
     a1.validate();    
+
+    let a2 = SI.ActionManifest.loadJSONfile(filename);
+    console.log(_.isEqual(a1,a2));
+
 }
 
 function test_creating_invalid_action_file()
