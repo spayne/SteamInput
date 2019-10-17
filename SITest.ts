@@ -57,6 +57,7 @@ function test_creating_invalid_action_file_1()
     }      
 }
 
+test_action_file_validation();
 test_creating_valid_action_file();
 test_creating_invalid_action_file();
 test_creating_invalid_action_file_1();

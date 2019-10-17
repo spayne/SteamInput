@@ -1,13 +1,38 @@
 import * as fs from "fs";
 import * as path from "path";
 import { windef, Key } from "windows-registry";
+import 'reflect-metadata';
+import { jsonObject, jsonMember, jsonArrayMember, TypedJSON } from 'typedjson';
 
+@jsonObject
+class Action {
+  public name : string;
+  public requirement : string;
+  public type: string;
+}
+
+@jsonObject
+class DefaultBinding {
+  public controller_type: string;
+  public binding_url : string
+}
+
+@jsonObject
+class ActionSet {
+  public name : string;
+  public usage : string;
+}
+
+
+@jsonObject
 export class ActionManifest {
 
-  actions : {name : string, requirement : string , type: string} [] = [];
-  default_bindings : { controller_type: string, binding_url : string }[] = [];
-  action_sets : {name : string, usage: string}[] = [];
+  actions : Action[] = [];
+  default_bindings : DefaultBinding[] = [];
+  action_sets : ActionSet[] = [];
+
   // an array of objects/
+  //@jsonArrayMember(any)
   localization : any[] = [];
 
   constructor() {    
@@ -58,6 +83,13 @@ export class ActionManifest {
   writeJSONfile(filename : string)
   {
     fs.writeFileSync(filename, JSON.stringify(this,null, 4));
+  }
+
+  loadJSONfile(fn)
+  {
+    let contents : Buffer = fs.readFileSync(fn);
+    //var jsonobj = JSON.parse(contents.toString(), this);
+    //this = jsonobj;
   }
 
   validate()

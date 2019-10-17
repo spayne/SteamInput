@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "reflect-metadata": "^0.1.13",
+    "typedjson": "^1.5.0",
     "windows-registry": "^0.1.5"
   },
   "devDependencies": {
